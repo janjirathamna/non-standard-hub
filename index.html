@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Non-Standard Dashboards</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0e1318;--panel:#161d24;--panel2:#1c252e;--line:#26313b;--text:#e6edf3;--muted:#8b98a5;--accent:#2dd4bf;--accent-ink:#04201c;--danger:#f87171}
+  [data-theme=light]{--bg:#eef1f3;--panel:#fff;--panel2:#f3f5f7;--line:#d9dfe4;--text:#18222b;--muted:#617080;--accent:#0f766e;--accent-ink:#fff;--danger:#b91c1c}
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0}
+  body{font-family:'IBM Plex Sans','Noto Sans SC',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:13px;display:flex;flex-direction:column}
+  header{background:var(--panel);border-bottom:1px solid var(--line);padding:8px 12px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;flex:none}
+  h1{margin:0;font-size:15px;font-weight:700;letter-spacing:.02em}
+  .row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+  .btn{display:inline-flex;align-items:center;gap:4px;font:inherit;font-size:12px;line-height:1;padding:6px 10px;border:1px solid var(--line);border-radius:6px;background:var(--panel2);color:var(--text);cursor:pointer;text-decoration:none;white-space:nowrap}
+  .btn:hover{border-color:var(--accent)}
+  .btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+  nav{display:flex;gap:4px;padding:6px 12px;background:var(--panel);border-bottom:1px solid var(--line);overflow-x:auto;flex:none}
+  .tab{font:inherit;font-size:12px;padding:6px 12px;border-radius:6px;color:var(--muted);border:1px solid transparent;background:none;cursor:pointer;white-space:nowrap}
+  .tab.on{background:var(--panel2);color:var(--text);border-color:var(--line);font-weight:600}
+  .btn:focus-visible,.tab:focus-visible,.card:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+  main{flex:1;min-height:0;display:flex;flex-direction:column}
+  #home{padding:16px 12px;max-width:1000px;width:100%;margin:0 auto;overflow:auto}
+  #home h2{font-size:14px;margin:0 0 4px}
+  #home p{margin:0 0 14px;color:var(--muted)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+  .card{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 38px 14px 14px;cursor:pointer;border-left:4px solid var(--c,var(--accent))}
+  .card:hover{border-color:var(--c,var(--accent));background:var(--panel2)}
+  .card b{display:block;font-size:14px;margin-bottom:4px}
+  .card span{color:var(--muted);font-size:12px;line-height:1.5;word-break:break-word}
+  .card .tools{position:absolute;top:8px;right:8px;display:flex;flex-direction:column;gap:4px}
+  .ico{width:24px;height:24px;display:grid;place-items:center;border:1px solid var(--line);border-radius:5px;background:var(--panel2);color:var(--muted);font-size:12px;cursor:pointer;text-decoration:none}
+  .ico:hover{color:var(--text);border-color:var(--accent)}
+  .ico.del:hover{color:var(--danger);border-color:var(--danger)}
+  .note{margin-top:14px;font-size:11px;color:var(--muted)}
+  #frameWrap{flex:1;min-height:0;display:none;flex-direction:column}
+  #frame{flex:1;width:100%;border:0;background:#fff;display:block}
+  #fbar{display:flex;gap:6px;align-items:center;justify-content:flex-end;padding:4px 12px;background:var(--panel);border-bottom:1px solid var(--line);color:var(--muted);font-size:12px}
+  #fbar span{margin-right:auto}
+  dialog{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:16px;width:min(420px,92vw)}
+  dialog::backdrop{background:rgba(0,0,0,.55)}
+  dialog h3{margin:0 0 10px;font-size:14px}
+  dialog label{display:block;font-size:11px;color:var(--muted);margin:8px 0 3px}
+  dialog input{width:100%;font:inherit;font-size:13px;padding:7px 8px;border:1px solid var(--line);border-radius:6px;background:var(--panel2);color:var(--text)}
+  #err{color:var(--danger);font-size:12px;min-height:16px;margin-top:6px}
+  .actions{display:flex;justify-content:flex-end;gap:6px;margin-top:8px}
+</style>
+</head>
+<body>
+<header>
+  <h1 id="title"></h1>
+  <div class="row">
+    <button class="btn primary" id="bAdd"></button>
+    <button class="btn" id="bEn">EN</button>
+    <button class="btn" id="bZh">中文</button>
+    <button class="btn" id="bTheme" title="Theme">◐</button>
+  </div>
+</header>
+<nav id="nav"></nav>
+<main>
+  <section id="home"></section>
+  <section id="frameWrap">
+    <div id="fbar"><span id="fname"></span><a class="btn" id="fopen" target="_blank" rel="noopener"></a></div>
+    <iframe id="frame" title="dashboard"></iframe>
+  </section>
+</main>
+
+<dialog id="dlg">
+  <h3 id="dTitle"></h3>
+  <label id="lUrl"></label><input id="iUrl" type="url" placeholder="https://username.github.io/my-dashboard/" autocomplete="off">
+  <label id="lName"></label><input id="iName" type="text" maxlength="60" autocomplete="off">
+  <label id="lDesc"></label><input id="iDesc" type="text" maxlength="160" autocomplete="off">
+  <div id="err" role="alert"></div>
+  <div class="actions"><button class="btn" id="dCancel"></button><button class="btn primary" id="dSave"></button></div>
+</dialog>
+
+<script>
+/* ===== Optional: shared links for the whole team =====
+   Leave empty = links are saved in this browser only.
+   Paste the Web App URL of HubApi.gs (…/exec) to share links with everyone. */
+const HUB_API = 'https://script.google.com/macros/s/AKfycbyrf18WTESEszNmjFdAuJXYLEI7jfqXfLJ1VPvbk6wucIDmNDwXoQlEyZ99LUPZISax6Q/exec';
+
+const PALETTE = ['#2dd4bf', '#f59e0b', '#a78bfa', '#f472b6', '#60a5fa', '#34d399', '#fb923c'];
+const SEED = [   // first-run defaults (local mode only). Delete or add from the page.
+  { id: 'skill',  color: '#2dd4bf', name: 'Skill Matrix', url: 'https://xzodusz.github.io/Skill-Matrix-Non-Standard/', desc: 'Machine skill & work readiness matrix' },
+  { id: 'issues', color: '#f59e0b', name: 'Problem Report', url: 'https://xzodusz.github.io/non-standard-dashboard/', desc: 'Machine issues across the 3 factories' }
+];
+
+const I18N = {
+  en: { title: 'Non-Standard Dashboards', home: 'Home', pick: 'Choose a dashboard', sub: 'Select a card or use the menu above.',
+    open: 'Open in new tab ↗', add: '＋ Add link', addTitle: 'Add a dashboard', url: 'Website link', name: 'Name (optional)', desc: 'Description (optional)',
+    save: 'Add', cancel: 'Cancel', errUrl: 'Paste a full link starting with https://', errDup: 'This link is already added.',
+    del: 'Delete this card?', empty: 'No dashboards yet. Click “＋ Add link” and paste a website link.',
+    local: 'Cards are saved in this browser only. To share them with the team, set HUB_API (see HubApi.gs).',
+    askKey: 'Enter the admin key to continue:', loadErr: 'Could not load links: ', tipOpen: 'Open in new tab', tipDel: 'Delete' },
+  zh: { title: '非标准看板中心', home: '首页', pick: '选择看板', sub: '点击卡片或使用上方菜单。',
+    open: '在新标签页打开 ↗', add: '＋ 添加链接', addTitle: '添加看板', url: '网站链接', name: '名称（可选）', desc: '说明（可选）',
+    save: '添加', cancel: '取消', errUrl: '请粘贴以 https:// 开头的完整链接', errDup: '该链接已添加。',
+    del: '确定删除此卡片？', empty: '还没有看板。点击“＋ 添加链接”并粘贴网站链接。',
+    local: '卡片仅保存在当前浏览器。若要与团队共享，请设置 HUB_API（见 HubApi.gs）。',
+    askKey: '请输入管理密钥：', loadErr: '无法加载链接：', tipOpen: '在新标签页打开', tipDel: '删除' }
+};
+let lang = localStorage.getItem('hubLang') || 'en';
+let theme = localStorage.getItem('hubTheme') || 'dark';
+let LINKS = [], loadError = '';
+const $ = id => document.getElementById(id);
+const t = k => I18N[lang][k];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* ---------- storage layer (local or shared via Google Apps Script) ---------- */
+async function loadLinks() {
+  if (HUB_API) {
+    const j = await (await fetch(HUB_API)).json();
+    if (!j.ok) throw new Error(j.error);
+    return j.links;
+  }
+  const raw = localStorage.getItem('hubLinks');
+  if (raw === null) { localStorage.setItem('hubLinks', JSON.stringify(SEED)); return SEED.slice(); }
+  try { return JSON.parse(raw) || []; } catch (e) { return []; }
+}
+async function post(body) {                         // shared mode: add / remove need the admin key
+  let key = sessionStorage.getItem('hubKey') || prompt(t('askKey'));
+  if (!key) throw new Error('cancelled');
+  const res = await fetch(HUB_API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(Object.assign({ key }, body)) });
+  const j = await res.json();
+  if (!j.ok) { sessionStorage.removeItem('hubKey'); throw new Error(j.error); }
+  sessionStorage.setItem('hubKey', key);
+}
+async function addLink(link) {
+  if (HUB_API) { await post({ action: 'add', link }); LINKS = await loadLinks(); return; }
+  link.id = 'l' + Date.now().toString(36);
+  LINKS.push(link); localStorage.setItem('hubLinks', JSON.stringify(LINKS));
+}
+async function removeLink(id) {
+  if (HUB_API) { await post({ action: 'remove', id }); LINKS = await loadLinks(); return; }
+  LINKS = LINKS.filter(l => l.id !== id); localStorage.setItem('hubLinks', JSON.stringify(LINKS));
+}
+
+/* ---------- rendering ---------- */
+const current = () => LINKS.find(l => l.id === location.hash.slice(1)) || null;
+
+function render() {
+  document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+  document.documentElement.dataset.theme = theme;
+  document.title = $('title').textContent = t('title');
+  $('bAdd').textContent = t('add');
+  $('bEn').classList.toggle('primary', lang === 'en');
+  $('bZh').classList.toggle('primary', lang === 'zh');
+
+  const cur = current();
+  $('nav').innerHTML = `<button class="tab ${cur ? '' : 'on'}" data-id="">${esc(t('home'))}</button>` +
+    LINKS.map(l => `<button class="tab ${cur && cur.id === l.id ? 'on' : ''}" data-id="${esc(l.id)}">${esc(l.name)}</button>`).join('');
+
+  $('home').innerHTML = `<h2>${esc(t('pick'))}</h2><p>${esc(t('sub'))}</p>` +
+    (loadError ? `<p style="color:var(--danger)">${esc(t('loadErr') + loadError)}</p>` : '') +
+    (LINKS.length ? `<div class="grid">${LINKS.map(l => `
+      <div class="card" tabindex="0" role="link" style="--c:${esc(l.color)}" data-id="${esc(l.id)}">
+        <b>${esc(l.name)}</b><span>${esc(l.desc || l.url)}</span>
+        <div class="tools">
+          <a class="ico" href="${esc(l.url)}" target="_blank" rel="noopener" title="${esc(t('tipOpen'))}" data-stop>↗</a>
+          <button class="ico del" title="${esc(t('tipDel'))}" data-del="${esc(l.id)}">✕</button>
+        </div></div>`).join('')}</div>` : (loadError ? '' : `<p>${esc(t('empty'))}</p>`)) +
+    (HUB_API ? '' : `<div class="note">${esc(t('local'))}</div>`);
+
+  $('home').style.display = cur ? 'none' : 'block';
+  $('frameWrap').style.display = cur ? 'flex' : 'none';
+  if (cur) {
+    $('fname').textContent = cur.name;
+    $('fopen').href = cur.url; $('fopen').textContent = t('open');
+    if ($('frame').dataset.src !== cur.url) { $('frame').src = cur.url; $('frame').dataset.src = cur.url; }   // no reload on language/theme change
+  }
+}
+
+/* ---------- events ---------- */
+$('nav').onclick = e => { const b = e.target.closest('.tab'); if (b) location.hash = b.dataset.id; };
+$('home').onclick = async e => {
+  if (e.target.closest('[data-stop]')) return;
+  const d = e.target.closest('[data-del]');
+  if (d) {
+    if (!confirm(t('del'))) return;
+    try { await removeLink(d.dataset.del); } catch (err) { if (err.message !== 'cancelled') alert(err.message); }
+    render(); return;
+  }
+  const c = e.target.closest('.card'); if (c) location.hash = c.dataset.id;
+};
+$('home').onkeydown = e => { if (e.key === 'Enter' && e.target.classList.contains('card')) location.hash = e.target.dataset.id; };
+$('bEn').onclick = () => { lang = 'en'; localStorage.setItem('hubLang', lang); render(); fillDialogText(); };
+$('bZh').onclick = () => { lang = 'zh'; localStorage.setItem('hubLang', lang); render(); fillDialogText(); };
+$('bTheme').onclick = () => { theme = theme === 'dark' ? 'light' : 'dark'; localStorage.setItem('hubTheme', theme); render(); };
+window.addEventListener('hashchange', render);
+
+/* ---------- add-link dialog ---------- */
+function fillDialogText() {
+  $('dTitle').textContent = t('addTitle'); $('lUrl').textContent = t('url'); $('lName').textContent = t('name');
+  $('lDesc').textContent = t('desc'); $('dSave').textContent = t('save'); $('dCancel').textContent = t('cancel');
+}
+function guessName(u) {
+  const seg = u.pathname.split('/').filter(Boolean)[0] || u.hostname;
+  return decodeURIComponent(seg).replace(/[-_]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+}
+$('bAdd').onclick = () => { fillDialogText(); ['iUrl', 'iName', 'iDesc'].forEach(i => $(i).value = ''); $('err').textContent = ''; $('dlg').showModal(); $('iUrl').focus(); };
+$('dCancel').onclick = () => $('dlg').close();
+$('dSave').onclick = async () => {
+  let u;
+  try { u = new URL($('iUrl').value.trim()); if (!/^https?:$/.test(u.protocol)) throw 0; } catch (e) { $('err').textContent = t('errUrl'); return; }
+  if (LINKS.some(l => l.url === u.href)) { $('err').textContent = t('errDup'); return; }
+  $('dSave').disabled = true;
+  try {
+    await addLink({ name: $('iName').value.trim() || guessName(u), url: u.href, desc: $('iDesc').value.trim(), color: PALETTE[LINKS.length % PALETTE.length] });
+    $('dlg').close(); location.hash = ''; render();
+  } catch (e) { if (e.message !== 'cancelled') $('err').textContent = e.message; }
+  $('dSave').disabled = false;
+};
+$('iUrl').addEventListener('keydown', e => { if (e.key === 'Enter') $('dSave').click(); });
+
+/* ---------- start ---------- */
+(async () => {
+  render();
+  try { LINKS = await loadLinks(); } catch (e) { loadError = e.message; }
+  render();
+})();
+</script>
+</body>
+</html>
