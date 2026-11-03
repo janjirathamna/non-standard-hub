@@ -22,19 +22,28 @@
   .tab.on{background:var(--panel2);color:var(--text);border-color:var(--line);font-weight:600}
   .btn:focus-visible,.tab:focus-visible,.card:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
   main{flex:1;min-height:0;display:flex;flex-direction:column}
-  #home{padding:16px 12px;max-width:1000px;width:100%;margin:0 auto;overflow:auto}
-  #home h2{font-size:14px;margin:0 0 4px}
-  #home p{margin:0 0 14px;color:var(--muted)}
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
-  .card{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 38px 14px 14px;cursor:pointer;border-left:4px solid var(--c,var(--accent))}
+  #home{padding:16px 12px;max-width:1200px;width:100%;margin:0 auto;overflow:auto}
+  .top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+  .top h2{font-size:14px;margin:0 0 4px}
+  .top p{margin:0;color:var(--muted)}
+  .grid{display:grid;gap:10px;grid-auto-rows:130px}
+  .card{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px;cursor:pointer;border-left:6px solid var(--c,var(--accent));overflow:hidden;display:flex;flex-direction:column}
   .card:hover{border-color:var(--c,var(--accent));background:var(--panel2)}
-  .card b{display:block;font-size:14px;margin-bottom:4px}
-  .card span{color:var(--muted);font-size:12px;line-height:1.5;word-break:break-word}
-  .card .tools{position:absolute;top:8px;right:8px;display:flex;flex-direction:column;gap:4px}
-  .ico{width:24px;height:24px;display:grid;place-items:center;border:1px solid var(--line);border-radius:5px;background:var(--panel2);color:var(--muted);font-size:12px;cursor:pointer;text-decoration:none}
+  .card b{display:block;font-size:14px;margin-bottom:4px;word-break:break-word}
+  .card .d{color:var(--muted);font-size:12px;line-height:1.5;word-break:break-word}
+  .card .u{margin-top:auto;color:var(--muted);font-size:11px;opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .card .open{position:absolute;top:8px;right:8px}
+  .ico{min-width:24px;height:24px;padding:0 6px;display:inline-grid;place-items:center;border:1px solid var(--line);border-radius:5px;background:var(--panel2);color:var(--muted);font:inherit;font-size:12px;cursor:pointer;text-decoration:none}
   .ico:hover{color:var(--text);border-color:var(--accent)}
   .ico.del:hover{color:var(--danger);border-color:var(--danger)}
+  .cfgmode .card{cursor:grab;border-style:dashed;border-left-style:solid}
+  .card.over{outline:2px dashed var(--accent);outline-offset:2px}
+  .card.drag{opacity:.45}
+  .tools{position:absolute;left:6px;right:6px;bottom:6px;display:flex;gap:3px;flex-wrap:wrap;align-items:center;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:3px}
+  .tools input[type=color]{width:26px;height:24px;padding:0;border:1px solid var(--line);border-radius:5px;background:none;cursor:pointer}
+  .tools .sp{flex:1}
   .note{margin-top:14px;font-size:11px;color:var(--muted)}
+  .banner{background:var(--panel2);border:1px solid var(--accent);border-radius:8px;padding:8px 12px;margin-bottom:10px;font-size:12px}
   #frameWrap{flex:1;min-height:0;display:none;flex-direction:column}
   #frame{flex:1;width:100%;border:0;background:#fff;display:block}
   #fbar{display:flex;gap:6px;align-items:center;justify-content:flex-end;padding:4px 12px;background:var(--panel);border-bottom:1px solid var(--line);color:var(--muted);font-size:12px}
@@ -43,8 +52,8 @@
   dialog::backdrop{background:rgba(0,0,0,.55)}
   dialog h3{margin:0 0 10px;font-size:14px}
   dialog label{display:block;font-size:11px;color:var(--muted);margin:8px 0 3px}
-  dialog input{width:100%;font:inherit;font-size:13px;padding:7px 8px;border:1px solid var(--line);border-radius:6px;background:var(--panel2);color:var(--text)}
-  #err{color:var(--danger);font-size:12px;min-height:16px;margin-top:6px}
+  dialog input[type=text],dialog input[type=url],dialog input[type=password]{width:100%;font:inherit;font-size:13px;padding:7px 8px;border:1px solid var(--line);border-radius:6px;background:var(--panel2);color:var(--text)}
+  .err{color:var(--danger);font-size:12px;min-height:16px;margin-top:6px}
   .actions{display:flex;justify-content:flex-end;gap:6px;margin-top:8px}
 </style>
 </head>
@@ -52,7 +61,6 @@
 <header>
   <h1 id="title"></h1>
   <div class="row">
-    <button class="btn primary" id="bAdd"></button>
     <button class="btn" id="bEn">EN</button>
     <button class="btn" id="bZh">中文</button>
     <button class="btn" id="bTheme" title="Theme">◐</button>
@@ -60,162 +68,247 @@
 </header>
 <nav id="nav"></nav>
 <main>
-  <section id="home"></section>
+  <section id="home">
+    <div class="top">
+      <div><h2 id="hTitle"></h2><p id="hSub"></p></div>
+      <div class="row" id="cfgBar"></div>
+    </div>
+    <div id="banner"></div>
+    <div id="grid" class="grid"></div>
+    <div class="note" id="note"></div>
+  </section>
   <section id="frameWrap">
     <div id="fbar"><span id="fname"></span><a class="btn" id="fopen" target="_blank" rel="noopener"></a></div>
     <iframe id="frame" title="dashboard"></iframe>
   </section>
 </main>
 
+<!-- password -->
+<dialog id="pwDlg">
+  <h3 id="pwTitle"></h3>
+  <label id="pwLbl"></label><input id="pwIn" type="password" autocomplete="current-password">
+  <div class="err" id="pwErr" role="alert"></div>
+  <div class="actions"><button class="btn" id="pwCancel"></button><button class="btn primary" id="pwOk"></button></div>
+</dialog>
+
+<!-- add / edit link -->
 <dialog id="dlg">
   <h3 id="dTitle"></h3>
   <label id="lUrl"></label><input id="iUrl" type="url" placeholder="https://username.github.io/my-dashboard/" autocomplete="off">
   <label id="lName"></label><input id="iName" type="text" maxlength="60" autocomplete="off">
   <label id="lDesc"></label><input id="iDesc" type="text" maxlength="160" autocomplete="off">
-  <div id="err" role="alert"></div>
+  <div class="err" id="err" role="alert"></div>
   <div class="actions"><button class="btn" id="dCancel"></button><button class="btn primary" id="dSave"></button></div>
 </dialog>
 
 <script>
-/* ===== Optional: shared links for the whole team =====
-   Leave empty = links are saved in this browser only.
-   Paste the Web App URL of HubApi.gs (…/exec) to share links with everyone. */
-const HUB_API = 'https://script.google.com/macros/s/AKfycbyrf18WTESEszNmjFdAuJXYLEI7jfqXfLJ1VPvbk6wucIDmNDwXoQlEyZ99LUPZISax6Q/exec';
+/* ===== Shared links for the whole team =====
+   Empty HUB_API = links are saved in this browser only and the password below is checked in the page (not secure).
+   Paste the Web App URL of HubApi-v2.gs (…/exec) to share the cards with everyone; then the password is checked on the server. */
+const HUB_API = '';
+const LOCAL_ADMIN_KEY = 'change-me';     // only used when HUB_API is empty
 
 const PALETTE = ['#2dd4bf', '#f59e0b', '#a78bfa', '#f472b6', '#60a5fa', '#34d399', '#fb923c'];
-const SEED = [   // first-run defaults (local mode only). Delete or add from the page.
-  { id: 'skill',  color: '#2dd4bf', name: 'Skill Matrix', url: 'https://xzodusz.github.io/Skill-Matrix-Non-Standard/', desc: 'Machine skill & work readiness matrix' },
-  { id: 'issues', color: '#f59e0b', name: 'Problem Report', url: 'https://xzodusz.github.io/non-standard-dashboard/', desc: 'Machine issues across the 3 factories' }
+const SEED = [
+  { id: 'skill',  color: '#2dd4bf', w: 1, h: 1, name: 'Skill Matrix', url: 'https://xzodusz.github.io/Skill-Matrix-Non-Standard/', desc: 'Machine skill & work readiness matrix' },
+  { id: 'issues', color: '#f59e0b', w: 1, h: 1, name: 'Problem Report', url: 'https://xzodusz.github.io/non-standard-dashboard/', desc: 'Machine issues across the 3 factories' }
 ];
 
 const I18N = {
   en: { title: 'Non-Standard Dashboards', home: 'Home', pick: 'Choose a dashboard', sub: 'Select a card or use the menu above.',
-    open: 'Open in new tab ↗', add: '＋ Add link', addTitle: 'Add a dashboard', url: 'Website link', name: 'Name (optional)', desc: 'Description (optional)',
-    save: 'Add', cancel: 'Cancel', errUrl: 'Paste a full link starting with https://', errDup: 'This link is already added.',
-    del: 'Delete this card?', empty: 'No dashboards yet. Click “＋ Add link” and paste a website link.',
-    local: 'Cards are saved in this browser only. To share them with the team, set HUB_API (see HubApi.gs).',
-    askKey: 'Enter the admin key to continue:', loadErr: 'Could not load links: ', tipOpen: 'Open in new tab', tipDel: 'Delete' },
+    open: 'Open in new tab ↗', config: '⚙ Config', add: '＋ Add link', save: 'Save', cancel: 'Cancel', ok: 'OK', saving: 'Saving…',
+    pwTitle: 'Admin password', pwLbl: 'Enter the admin password to edit the cards', pwBad: 'Wrong password.',
+    addTitle: 'Add a dashboard', editTitle: 'Edit link', url: 'Website link', name: 'Name (optional)', desc: 'Description (optional)',
+    errUrl: 'Paste a full link starting with https://', errDup: 'This link is already added.',
+    empty: 'No dashboards yet. Open Config and add a link.', banner: 'Config mode: drag cards to reorder, use the buttons on each card to resize, recolor, edit or delete. Nothing is saved until you press Save.',
+    local: 'Cards are saved in this browser only. To share them with the team, set HUB_API (see HubApi-v2.gs).',
+    loadErr: 'Could not load links: ', tipOpen: 'Open in new tab', tipDel: 'Delete', tipEdit: 'Edit', tipColor: 'Color',
+    tipL: 'Move earlier', tipR: 'Move later', wMinus: 'Narrower', wPlus: 'Wider', hMinus: 'Shorter', hPlus: 'Taller', discard: 'Discard your changes?' },
   zh: { title: '非标准看板中心', home: '首页', pick: '选择看板', sub: '点击卡片或使用上方菜单。',
-    open: '在新标签页打开 ↗', add: '＋ 添加链接', addTitle: '添加看板', url: '网站链接', name: '名称（可选）', desc: '说明（可选）',
-    save: '添加', cancel: '取消', errUrl: '请粘贴以 https:// 开头的完整链接', errDup: '该链接已添加。',
-    del: '确定删除此卡片？', empty: '还没有看板。点击“＋ 添加链接”并粘贴网站链接。',
-    local: '卡片仅保存在当前浏览器。若要与团队共享，请设置 HUB_API（见 HubApi.gs）。',
-    askKey: '请输入管理密钥：', loadErr: '无法加载链接：', tipOpen: '在新标签页打开', tipDel: '删除' }
+    open: '在新标签页打开 ↗', config: '⚙ 配置', add: '＋ 添加链接', save: '保存', cancel: '取消', ok: '确定', saving: '保存中…',
+    pwTitle: '管理员密码', pwLbl: '请输入管理员密码以编辑卡片', pwBad: '密码错误。',
+    addTitle: '添加看板', editTitle: '编辑链接', url: '网站链接', name: '名称（可选）', desc: '说明（可选）',
+    errUrl: '请粘贴以 https:// 开头的完整链接', errDup: '该链接已添加。',
+    empty: '还没有看板。请打开配置并添加链接。', banner: '配置模式：拖动卡片可调整顺序，使用卡片上的按钮调整大小、颜色、编辑或删除。点击保存后才会生效。',
+    local: '卡片仅保存在当前浏览器。若要与团队共享，请设置 HUB_API（见 HubApi-v2.gs）。',
+    loadErr: '无法加载链接：', tipOpen: '在新标签页打开', tipDel: '删除', tipEdit: '编辑', tipColor: '颜色',
+    tipL: '前移', tipR: '后移', wMinus: '变窄', wPlus: '变宽', hMinus: '变矮', hPlus: '变高', discard: '放弃所做的修改？' }
 };
 let lang = localStorage.getItem('hubLang') || 'en';
 let theme = localStorage.getItem('hubTheme') || 'dark';
-let LINKS = [], loadError = '';
+let LINKS = [], DRAFT = null, loadError = '', editIdx = -1, dragIdx = -1;
 const $ = id => document.getElementById(id);
 const t = k => I18N[lang][k];
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const clamp = (v, a, b) => Math.max(a, Math.min(b, Math.round(Number(v)) || a));
+const norm = l => ({ id: l.id || '', name: l.name || '', url: l.url || '', desc: l.desc || '', color: /^#[0-9a-f]{6}$/i.test(l.color) ? l.color : PALETTE[0], w: clamp(l.w, 1, 4), h: clamp(l.h, 1, 3) });
+const cols = () => innerWidth >= 1000 ? 4 : innerWidth >= 640 ? 2 : 1;
+const list = () => DRAFT || LINKS;
+const current = () => LINKS.find(l => l.id === location.hash.slice(1)) || null;
 
-/* ---------- storage layer (local or shared via Google Apps Script) ---------- */
+/* ---------- storage (local or shared via Google Apps Script) ---------- */
 async function loadLinks() {
   if (HUB_API) {
     const j = await (await fetch(HUB_API)).json();
     if (!j.ok) throw new Error(j.error);
-    return j.links;
+    return j.links.map(norm);
   }
   const raw = localStorage.getItem('hubLinks');
-  if (raw === null) { localStorage.setItem('hubLinks', JSON.stringify(SEED)); return SEED.slice(); }
-  try { return JSON.parse(raw) || []; } catch (e) { return []; }
+  if (raw === null) { localStorage.setItem('hubLinks', JSON.stringify(SEED)); return SEED.map(norm); }
+  try { return (JSON.parse(raw) || []).map(norm); } catch (e) { return []; }
 }
-async function post(body) {                         // shared mode: add / remove need the admin key
-  let key = sessionStorage.getItem('hubKey') || prompt(t('askKey'));
-  if (!key) throw new Error('cancelled');
+async function post(body, key) {                    // shared mode: every admin action carries the password
   const res = await fetch(HUB_API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(Object.assign({ key }, body)) });
   const j = await res.json();
-  if (!j.ok) { sessionStorage.removeItem('hubKey'); throw new Error(j.error); }
-  sessionStorage.setItem('hubKey', key);
+  if (!j.ok) throw new Error(j.error);
 }
-async function addLink(link) {
-  if (HUB_API) { await post({ action: 'add', link }); LINKS = await loadLinks(); return; }
-  link.id = 'l' + Date.now().toString(36);
-  LINKS.push(link); localStorage.setItem('hubLinks', JSON.stringify(LINKS));
+async function checkPassword(key) {
+  if (HUB_API) { await post({ action: 'auth' }, key); return; }
+  if (key !== LOCAL_ADMIN_KEY) throw new Error(t('pwBad'));
 }
-async function removeLink(id) {
-  if (HUB_API) { await post({ action: 'remove', id }); LINKS = await loadLinks(); return; }
-  LINKS = LINKS.filter(l => l.id !== id); localStorage.setItem('hubLinks', JSON.stringify(LINKS));
+async function saveLinks() {
+  const key = sessionStorage.getItem('hubKey') || '';
+  if (HUB_API) { await post({ action: 'save', links: DRAFT }, key); LINKS = await loadLinks(); }
+  else { LINKS = DRAFT.map((l, i) => Object.assign({}, l, { id: l.id || 'l' + Date.now().toString(36) + i })); localStorage.setItem('hubLinks', JSON.stringify(LINKS)); }
 }
 
 /* ---------- rendering ---------- */
-const current = () => LINKS.find(l => l.id === location.hash.slice(1)) || null;
-
 function render() {
   document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
   document.documentElement.dataset.theme = theme;
   document.title = $('title').textContent = t('title');
-  $('bAdd').textContent = t('add');
   $('bEn').classList.toggle('primary', lang === 'en');
   $('bZh').classList.toggle('primary', lang === 'zh');
 
-  const cur = current();
+  const cur = DRAFT ? null : current();
   $('nav').innerHTML = `<button class="tab ${cur ? '' : 'on'}" data-id="">${esc(t('home'))}</button>` +
     LINKS.map(l => `<button class="tab ${cur && cur.id === l.id ? 'on' : ''}" data-id="${esc(l.id)}">${esc(l.name)}</button>`).join('');
 
-  $('home').innerHTML = `<h2>${esc(t('pick'))}</h2><p>${esc(t('sub'))}</p>` +
-    (loadError ? `<p style="color:var(--danger)">${esc(t('loadErr') + loadError)}</p>` : '') +
-    (LINKS.length ? `<div class="grid">${LINKS.map(l => `
-      <div class="card" tabindex="0" role="link" style="--c:${esc(l.color)}" data-id="${esc(l.id)}">
-        <b>${esc(l.name)}</b><span>${esc(l.desc || l.url)}</span>
+  $('hTitle').textContent = t('pick'); $('hSub').textContent = t('sub');
+  $('cfgBar').innerHTML = DRAFT
+    ? `<button class="btn" id="bAdd">${esc(t('add'))}</button><button class="btn primary" id="bSave">${esc(t('save'))}</button><button class="btn" id="bCancel">${esc(t('cancel'))}</button>`
+    : `<button class="btn" id="bCfg">${esc(t('config'))}</button>`;
+  $('banner').innerHTML = DRAFT ? `<div class="banner">${esc(t('banner'))}</div>` : (loadError ? `<div class="banner" style="border-color:var(--danger)">${esc(t('loadErr') + loadError)}</div>` : '');
+  $('note').textContent = HUB_API ? '' : t('local');
+
+  const n = cols(), g = $('grid');
+  g.className = 'grid' + (DRAFT ? ' cfgmode' : '');
+  g.style.gridTemplateColumns = `repeat(${n}, minmax(0, 1fr))`;
+  const L = list();
+  g.innerHTML = L.length ? L.map((l, i) => {
+    const w = Math.min(l.w, n), host = (() => { try { return new URL(l.url).host + new URL(l.url).pathname.replace(/\/$/, ''); } catch (e) { return l.url; } })();
+    const style = `--c:${esc(l.color)};grid-column:span ${w};grid-row:span ${l.h}`;
+    if (!DRAFT) return `<div class="card" tabindex="0" role="link" style="${style}" data-id="${esc(l.id)}">
+        <b>${esc(l.name)}</b><span class="d">${esc(l.desc)}</span><span class="u">${esc(host)}</span>
+        <a class="ico open" href="${esc(l.url)}" target="_blank" rel="noopener" title="${esc(t('tipOpen'))}" data-stop>↗</a></div>`;
+    return `<div class="card" draggable="true" style="${style}" data-i="${i}">
+        <b>${esc(l.name || '—')}</b><span class="d">${esc(l.desc)}</span><span class="u">${esc(host)}</span>
         <div class="tools">
-          <a class="ico" href="${esc(l.url)}" target="_blank" rel="noopener" title="${esc(t('tipOpen'))}" data-stop>↗</a>
-          <button class="ico del" title="${esc(t('tipDel'))}" data-del="${esc(l.id)}">✕</button>
-        </div></div>`).join('')}</div>` : (loadError ? '' : `<p>${esc(t('empty'))}</p>`)) +
-    (HUB_API ? '' : `<div class="note">${esc(t('local'))}</div>`);
+          <button class="ico" data-act="left" title="${esc(t('tipL'))}">‹</button><button class="ico" data-act="right" title="${esc(t('tipR'))}">›</button>
+          <button class="ico" data-act="w-" title="${esc(t('wMinus'))}">W−</button><button class="ico" data-act="w+" title="${esc(t('wPlus'))}">W+</button>
+          <button class="ico" data-act="h-" title="${esc(t('hMinus'))}">H−</button><button class="ico" data-act="h+" title="${esc(t('hPlus'))}">H+</button>
+          <input type="color" value="${esc(l.color)}" data-color title="${esc(t('tipColor'))}">
+          <span class="sp"></span>
+          <button class="ico" data-act="edit" title="${esc(t('tipEdit'))}">✎</button><button class="ico del" data-act="del" title="${esc(t('tipDel'))}">✕</button>
+        </div></div>`;
+  }).join('') : `<p>${esc(t('empty'))}</p>`;
 
   $('home').style.display = cur ? 'none' : 'block';
   $('frameWrap').style.display = cur ? 'flex' : 'none';
   if (cur) {
     $('fname').textContent = cur.name;
     $('fopen').href = cur.url; $('fopen').textContent = t('open');
-    if ($('frame').dataset.src !== cur.url) { $('frame').src = cur.url; $('frame').dataset.src = cur.url; }   // no reload on language/theme change
+    if ($('frame').dataset.src !== cur.url) { $('frame').src = cur.url; $('frame').dataset.src = cur.url; }
   }
 }
 
-/* ---------- events ---------- */
-$('nav').onclick = e => { const b = e.target.closest('.tab'); if (b) location.hash = b.dataset.id; };
-$('home').onclick = async e => {
-  if (e.target.closest('[data-stop]')) return;
-  const d = e.target.closest('[data-del]');
-  if (d) {
-    if (!confirm(t('del'))) return;
-    try { await removeLink(d.dataset.del); } catch (err) { if (err.message !== 'cancelled') alert(err.message); }
-    render(); return;
-  }
-  const c = e.target.closest('.card'); if (c) location.hash = c.dataset.id;
-};
-$('home').onkeydown = e => { if (e.key === 'Enter' && e.target.classList.contains('card')) location.hash = e.target.dataset.id; };
-$('bEn').onclick = () => { lang = 'en'; localStorage.setItem('hubLang', lang); render(); fillDialogText(); };
-$('bZh').onclick = () => { lang = 'zh'; localStorage.setItem('hubLang', lang); render(); fillDialogText(); };
-$('bTheme').onclick = () => { theme = theme === 'dark' ? 'light' : 'dark'; localStorage.setItem('hubTheme', theme); render(); };
-window.addEventListener('hashchange', render);
+/* ---------- config mode ---------- */
+function openPassword() {
+  $('pwTitle').textContent = t('pwTitle'); $('pwLbl').textContent = t('pwLbl');
+  $('pwOk').textContent = t('ok'); $('pwCancel').textContent = t('cancel');
+  $('pwIn').value = ''; $('pwErr').textContent = ''; $('pwDlg').showModal(); $('pwIn').focus();
+}
+async function submitPassword() {
+  const key = $('pwIn').value;
+  $('pwOk').disabled = true;
+  try { await checkPassword(key); sessionStorage.setItem('hubKey', key); $('pwDlg').close(); DRAFT = LINKS.map(l => Object.assign({}, l)); location.hash = ''; render(); }
+  catch (e) { $('pwErr').textContent = e.message === 'Wrong admin key' ? t('pwBad') : e.message; }
+  $('pwOk').disabled = false;
+}
+const dirty = () => JSON.stringify(DRAFT) !== JSON.stringify(LINKS);
 
-/* ---------- add-link dialog ---------- */
-function fillDialogText() {
-  $('dTitle').textContent = t('addTitle'); $('lUrl').textContent = t('url'); $('lName').textContent = t('name');
-  $('lDesc').textContent = t('desc'); $('dSave').textContent = t('save'); $('dCancel').textContent = t('cancel');
+function openLinkDialog(i) {
+  editIdx = i;
+  const l = i >= 0 ? DRAFT[i] : { url: '', name: '', desc: '' };
+  $('dTitle').textContent = i >= 0 ? t('editTitle') : t('addTitle');
+  $('lUrl').textContent = t('url'); $('lName').textContent = t('name'); $('lDesc').textContent = t('desc');
+  $('dSave').textContent = t('ok'); $('dCancel').textContent = t('cancel');
+  $('iUrl').value = l.url; $('iName').value = l.name; $('iDesc').value = l.desc; $('err').textContent = '';
+  $('dlg').showModal(); $('iUrl').focus();
 }
 function guessName(u) {
   const seg = u.pathname.split('/').filter(Boolean)[0] || u.hostname;
   return decodeURIComponent(seg).replace(/[-_]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 }
-$('bAdd').onclick = () => { fillDialogText(); ['iUrl', 'iName', 'iDesc'].forEach(i => $(i).value = ''); $('err').textContent = ''; $('dlg').showModal(); $('iUrl').focus(); };
-$('dCancel').onclick = () => $('dlg').close();
-$('dSave').onclick = async () => {
+function submitLink() {
   let u;
   try { u = new URL($('iUrl').value.trim()); if (!/^https?:$/.test(u.protocol)) throw 0; } catch (e) { $('err').textContent = t('errUrl'); return; }
-  if (LINKS.some(l => l.url === u.href)) { $('err').textContent = t('errDup'); return; }
-  $('dSave').disabled = true;
-  try {
-    await addLink({ name: $('iName').value.trim() || guessName(u), url: u.href, desc: $('iDesc').value.trim(), color: PALETTE[LINKS.length % PALETTE.length] });
-    $('dlg').close(); location.hash = ''; render();
-  } catch (e) { if (e.message !== 'cancelled') $('err').textContent = e.message; }
-  $('dSave').disabled = false;
-};
-$('iUrl').addEventListener('keydown', e => { if (e.key === 'Enter') $('dSave').click(); });
+  if (DRAFT.some((l, i) => i !== editIdx && l.url === u.href)) { $('err').textContent = t('errDup'); return; }
+  const f = { url: u.href, name: $('iName').value.trim() || guessName(u), desc: $('iDesc').value.trim() };
+  if (editIdx >= 0) Object.assign(DRAFT[editIdx], f);
+  else DRAFT.push(norm(Object.assign({ color: PALETTE[DRAFT.length % PALETTE.length], w: 1, h: 1 }, f)));
+  $('dlg').close(); render();
+}
+function move(from, to) {
+  if (to < 0 || to >= DRAFT.length || from === to) return;
+  DRAFT.splice(to, 0, DRAFT.splice(from, 1)[0]); render();
+}
 
-/* ---------- start ---------- */
+/* ---------- events ---------- */
+$('nav').onclick = e => { const b = e.target.closest('.tab'); if (!b) return; if (DRAFT && !confirm(t('discard'))) return; DRAFT = null; location.hash = b.dataset.id; render(); };
+$('cfgBar').onclick = async e => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.id === 'bCfg') openPassword();
+  else if (b.id === 'bAdd') openLinkDialog(-1);
+  else if (b.id === 'bCancel') { if (!dirty() || confirm(t('discard'))) { DRAFT = null; render(); } }
+  else if (b.id === 'bSave') {
+    b.disabled = true; b.textContent = t('saving');
+    try { await saveLinks(); DRAFT = null; loadError = ''; }
+    catch (err) { alert(err.message); }
+    render();
+  }
+};
+$('grid').onclick = e => {
+  if (e.target.closest('[data-stop]')) return;
+  const card = e.target.closest('.card'); if (!card) return;
+  if (!DRAFT) { location.hash = card.dataset.id; return; }
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  const i = +card.dataset.i, l = DRAFT[i], a = b.dataset.act;
+  if (a === 'left') move(i, i - 1); else if (a === 'right') move(i, i + 1);
+  else if (a === 'w-') { l.w = clamp(l.w - 1, 1, 4); render(); } else if (a === 'w+') { l.w = clamp(l.w + 1, 1, 4); render(); }
+  else if (a === 'h-') { l.h = clamp(l.h - 1, 1, 3); render(); } else if (a === 'h+') { l.h = clamp(l.h + 1, 1, 3); render(); }
+  else if (a === 'edit') openLinkDialog(i);
+  else if (a === 'del') { DRAFT.splice(i, 1); render(); }
+};
+$('grid').onkeydown = e => { if (e.key === 'Enter' && !DRAFT && e.target.classList.contains('card')) location.hash = e.target.dataset.id; };
+$('grid').addEventListener('input', e => {          // live colour change without re-rendering (keeps the picker open)
+  if (!DRAFT || !e.target.matches('[data-color]')) return;
+  const card = e.target.closest('.card'); DRAFT[+card.dataset.i].color = e.target.value; card.style.setProperty('--c', e.target.value);
+});
+$('grid').addEventListener('dragstart', e => { const c = e.target.closest('.card'); if (!DRAFT || !c) return; dragIdx = +c.dataset.i; c.classList.add('drag'); e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', String(dragIdx)); } catch (x) {} });
+$('grid').addEventListener('dragover', e => { const c = e.target.closest('.card'); if (!DRAFT || !c || dragIdx < 0) return; e.preventDefault(); document.querySelectorAll('.card.over').forEach(x => x.classList.remove('over')); c.classList.add('over'); });
+$('grid').addEventListener('drop', e => { const c = e.target.closest('.card'); if (!DRAFT || !c || dragIdx < 0) return; e.preventDefault(); const to = +c.dataset.i, from = dragIdx; dragIdx = -1; move(from, to); });
+$('grid').addEventListener('dragend', () => { dragIdx = -1; document.querySelectorAll('.card.drag,.card.over').forEach(x => x.classList.remove('drag', 'over')); });
+$('pwOk').onclick = submitPassword; $('pwCancel').onclick = () => $('pwDlg').close();
+$('pwIn').addEventListener('keydown', e => { if (e.key === 'Enter') submitPassword(); });
+$('dSave').onclick = submitLink; $('dCancel').onclick = () => $('dlg').close();
+$('iUrl').addEventListener('keydown', e => { if (e.key === 'Enter') submitLink(); });
+$('bEn').onclick = () => { lang = 'en'; localStorage.setItem('hubLang', lang); render(); };
+$('bZh').onclick = () => { lang = 'zh'; localStorage.setItem('hubLang', lang); render(); };
+$('bTheme').onclick = () => { theme = theme === 'dark' ? 'light' : 'dark'; localStorage.setItem('hubTheme', theme); render(); };
+window.addEventListener('hashchange', () => { if (!DRAFT) render(); });
+let rz; window.addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(render, 120); });
+
 (async () => {
   render();
   try { LINKS = await loadLinks(); } catch (e) { loadError = e.message; }
